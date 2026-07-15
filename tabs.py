@@ -37,33 +37,21 @@ def render_detect_tab(sp):
         if emotion is not None:
             st.session_state.last_emotion = emotion
             st.session_state.last_confidence = confidence
-            st.session_state.status = "detecting"
-            st.session_state.emotions.append(emotion)
             st.session_state.history.append(emotion)
 
-            if len(st.session_state.emotions) >= 2 and st.session_state.emotions[-1] == st.session_state.emotions[-2]:
-                st.session_state.detection_count += 1
-            else:
-                st.session_state.detection_count = 1
-
-            threshold = st.session_state.detection_threshold
-            reached, final_emotion = has_consecutive_repeats(st.session_state.emotions, threshold)
-            if reached and final_emotion is not None:
-                st.session_state.status = "playing"
-                try:
-                    success, message = play_song(sp, final_emotion)
-                    st.session_state.play_message = message
-                    if not success:
-                        st.session_state.status = "error"
-                except Exception as e:
+            # Instantly play music based on detected mood
+            st.session_state.status = "playing"
+            try:
+                success, message = play_song(sp, emotion)
+                st.session_state.play_message = message
+                if not success:
                     st.session_state.status = "error"
-                    st.session_state.play_message = f"Failed to play: {str(e)}"
-                st.session_state.emotions = []
-                st.session_state.detection_count = 0
+            except Exception as e:
+                st.session_state.status = "error"
+                st.session_state.play_message = f"Failed to play: {str(e)}"
         else:
             st.session_state.last_emotion = None
             st.session_state.last_confidence = None
-            st.session_state.detection_count = 0
 
     with col_result:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
@@ -81,20 +69,15 @@ def render_detect_tab(sp):
                 </div>
             ''', unsafe_allow_html=True)
 
-            threshold = st.session_state.detection_threshold
-            progress = min(st.session_state.detection_count / threshold, 1.0)
-            progress_pct = int(progress * 100)
-            st.markdown(f'''
-                <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:0.3rem;">
-                    🎯 Detection Progress
-                </p>
-                <div class="progress-container">
-                    <div class="progress-fill" style="width:{progress_pct}%;"></div>
-                    <span class="progress-text">
-                        {st.session_state.detection_count} / {threshold} consecutive
-                    </span>
-                </div>
-            ''', unsafe_allow_html=True)
+            if st.session_state.status == "playing" and st.session_state.play_message:
+                st.markdown(f'''
+                    <div style="text-align:center; margin-top:1rem; padding:0.8rem;
+                                background:linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1));
+                                border-radius:12px; border:1px solid rgba(34,197,94,0.3);">
+                        <p style="color:#22c55e; font-size:1rem; margin:0;">🎵 Now Playing</p>
+                        <p style="color:#94a3b8; font-size:0.85rem; margin:0.3rem 0 0 0;">{st.session_state.play_message}</p>
+                    </div>
+                ''', unsafe_allow_html=True)
         else:
             st.markdown('''
                 <div class="emotion-display">
