@@ -90,11 +90,22 @@ def load_face_cascade():
     """Load the Haar Cascade face detector (cached singleton)."""
     global _face_cascade
     if _face_cascade is None:
-        _face_cascade = cv2.CascadeClassifier(_CASCADE_PATH)
-        if _face_cascade.empty():
-            logger.error("Failed to load Haar Cascade from %s", _CASCADE_PATH)
-            raise FileNotFoundError(f"Haar Cascade not found at {_CASCADE_PATH}")
-        logger.info("Haar Cascade loaded successfully.")
+        # Try the bundled XML first, then fall back to OpenCV's built-in data
+        candidates = [
+            _CASCADE_PATH,
+            os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml'),
+        ]
+        for path in candidates:
+            if os.path.isfile(path):
+                _face_cascade = cv2.CascadeClassifier(path)
+                if not _face_cascade.empty():
+                    logger.info("Haar Cascade loaded from %s", path)
+                    return _face_cascade
+                _face_cascade = None  # reset if it loaded but was empty
+
+        raise FileNotFoundError(
+            f"Haar Cascade not found. Tried: {candidates}"
+        )
     return _face_cascade
 
 
