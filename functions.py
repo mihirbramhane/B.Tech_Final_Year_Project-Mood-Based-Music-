@@ -150,8 +150,9 @@ def detect_face(img):
 
     try:
         face_resized = cv2.resize(face, (128, 128))
-        face_resized = face_resized.reshape(1, 128, 128, 3)
-        predictions = model.predict(face_resized, verbose=0)
+        face_normalized = face_resized.astype('float32') / 255.0
+        face_normalized = face_normalized.reshape(1, 128, 128, 3)
+        predictions = model.predict(face_normalized, verbose=0)
         idx = predictions[0].argmax()
         emotion_label = EMOTION_LABELS[idx]
 
