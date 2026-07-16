@@ -50,7 +50,13 @@ if "detection_threshold" not in st.session_state:
 auth.handle_redirect()
 
 if not auth.is_authenticated():
-    st.markdown('<h1 class="hero-title">🎧 Mood Music Player</h1>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="app-header">'
+        '<span class="app-logo-badge">🎧</span>'
+        '<h1 class="hero-title">Mood Music Player</h1>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     st.markdown(
         '<p class="hero-subtitle">Let AI read your emotions and play the perfect playlist</p>',
         unsafe_allow_html=True,
@@ -59,34 +65,31 @@ if not auth.is_authenticated():
     if st.session_state.get("auth_error"):
         st.error(st.session_state.pop("auth_error"))
 
-    st.markdown('<div class="signin-wrap">', unsafe_allow_html=True)
     st.markdown('''
-        <div class="signin-steps">
-            <div class="signin-step"><span class="step-emoji">📷</span><span class="step-label">Show your face</span></div>
-            <div class="signin-arrow">→</div>
-            <div class="signin-step"><span class="step-emoji">🧠</span><span class="step-label">AI detects mood</span></div>
-            <div class="signin-arrow">→</div>
-            <div class="signin-step"><span class="step-emoji">🎵</span><span class="step-label">Spotify plays it</span></div>
+        <div class="signin-wrap">
+            <div class="signin-steps">
+                <div class="signin-step"><span class="step-num">1</span><span class="step-emoji">📷</span><span class="step-label">Show your face</span></div>
+                <div class="signin-arrow">→</div>
+                <div class="signin-step"><span class="step-num">2</span><span class="step-emoji">🧠</span><span class="step-label">AI detects mood</span></div>
+                <div class="signin-arrow">→</div>
+                <div class="signin-step"><span class="step-num">3</span><span class="step-emoji">🎵</span><span class="step-label">Spotify plays it</span></div>
+            </div>
         </div>
     ''', unsafe_allow_html=True)
 
     try:
         authorize_url = auth.build_authorize_url()
         st.markdown(
-            f'<a class="spotify-connect-btn" href="{authorize_url}">'
-            f'🎧 Connect with Spotify</a>',
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            '<p style="color:#64748b; font-size:0.85rem; margin-top:1.5rem;">'
-            'You need Spotify Premium and an active Spotify device (phone, desktop, or web player) '
-            'for playback to start.</p>',
+            f'<div class="signin-wrap">'
+            f'<a class="spotify-connect-btn" href="{authorize_url}">🎧 Connect with Spotify</a>'
+            f'<p class="signin-note">You need Spotify Premium and an active Spotify device '
+            f'(phone, desktop, or web player) for playback to start.</p>'
+            f'</div>',
             unsafe_allow_html=True,
         )
     except RuntimeError as e:
         st.error(str(e))
 
-    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ---------------------------------------------------------------------------
@@ -103,16 +106,32 @@ if sp is None:
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    st.markdown('<p class="sidebar-title">🎧 Mood Music Player</p>', unsafe_allow_html=True)
     st.markdown(
-        '<span class="status-badge status-playing">✅ Spotify Connected</span>',
+        '<div class="sidebar-brand">'
+        '<span class="badge-icon">🎧</span>'
+        '<div><p class="sidebar-title">Mood Music</p>'
+        '<p class="sidebar-tagline">AI-powered playback</p></div>'
+        '</div>',
         unsafe_allow_html=True,
     )
-    st.markdown("---")
     st.markdown(
-        '<p style="color:#64748b; font-size:0.8rem; text-align:center;">'
-        'Built with ❤️ using Streamlit, TensorFlow & Spotify API'
-        '</p>',
+        '<span class="status-badge status-playing"><span class="dot"></span>Spotify Connected</span>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f'<div class="sidebar-section" style="margin-top:1.2rem;">'
+        f'<div class="sidebar-stat-row"><span>Detections this session</span>'
+        f'<span class="val">{len(st.session_state.history)}</span></div>'
+        f'<div class="sidebar-stat-row"><span>Current status</span>'
+        f'<span class="val" style="text-transform:capitalize;">{st.session_state.status}</span></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="sidebar-footer">Built with ❤️ using<br/>Streamlit, TensorFlow &amp; Spotify API</p>',
         unsafe_allow_html=True,
     )
 
@@ -120,7 +139,13 @@ with st.sidebar:
 # Main Content
 # ---------------------------------------------------------------------------
 
-st.markdown('<h1 class="hero-title">🎧 Mood Music Player</h1>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="app-header">'
+    '<span class="app-logo-badge">🎧</span>'
+    '<h1 class="hero-title">Mood Music Player</h1>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 st.markdown(
     '<p class="hero-subtitle">Let AI read your emotions and play the perfect playlist</p>',
     unsafe_allow_html=True,
@@ -146,8 +171,11 @@ with tab_settings:
 # ---- Footer ----
 st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
 st.markdown(
-    '<p style="text-align:center; color:#475569; font-size:0.8rem; padding:1rem 0;">'
-    '🎧 Mood Music Player • Powered by TensorFlow + Spotify • Take snapshots to detect your emotion'
-    '</p>',
+    '<div class="app-footer">'
+    '<span>🎧 Mood Music Player</span>'
+    '<span class="foot-links">'
+    '<span>Powered by TensorFlow</span>·<span>Spotify Web API</span>·<span>Streamlit</span>'
+    '</span>'
+    '</div>',
     unsafe_allow_html=True,
 )
