@@ -228,11 +228,27 @@ def play_song(sp, mood):
     Returns:
         tuple: (success: bool, message: str)
     """
+    import time
+    import streamlit as st
+
     if mood not in PLAYLIST_MAP:
         return False, f"Unknown mood: '{mood}'. Valid moods: {list(PLAYLIST_MAP.keys())}"
 
     if sp is None:
         return False, "Spotify not connected! Sign in with Spotify first."
+
+    # Cooldown: prevent rapid API calls (15 seconds between plays)
+    last_play_time = st.session_state.get("_last_play_time", 0)
+    elapsed = time.time() - last_play_time
+    cooldown = 15  # seconds
+
+    if elapsed < cooldown:
+        remaining = int(cooldown - elapsed)
+        return True, (
+            f"Already playing {EMOTION_EMOJIS.get(st.session_state.get('_last_play_mood', mood), '🎵')} "
+            f"{st.session_state.get('_last_play_mood', mood)} playlist! "
+            f"Take another snapshot in {remaining}s to change mood."
+        )
 
     try:
         device_id = get_active_device(sp)
@@ -243,17 +259,36 @@ def play_song(sp, mood):
                 "or web player, then try again."
             )
 
-        # Transfer playback and start the playlist
+        # Start the playlist (transfer_playback first, then start)
         playlist_uri = f'spotify:playlist:{PLAYLIST_MAP[mood]}'
-        sp.transfer_playback(device_id, force_play=True)
+
+        try:
+            sp.transfer_playback(device_id, force_play=True)
+        except Exception:
+            pass  # transfer may fail if already on that device, that's fine
+
+        import time as _time
+        _time.sleep(0.3)  # brief pause between API calls
+
         sp.start_playback(device_id=device_id, context_uri=playlist_uri)
+
+        # Record cooldown timestamp
+        st.session_state["_last_play_time"] = time.time()
+        st.session_state["_last_play_mood"] = mood
 
         logger.info("Now playing '%s' playlist on device %s", mood, device_id)
         return True, f"Playing {EMOTION_EMOJIS.get(mood, '🎵')} {mood} playlist!"
 
     except Exception as e:
+        error_msg = str(e)
+        if "429" in error_msg or "Too Many" in error_msg.lower() or "Max Retries" in error_msg:
+            logger.warning("Spotify rate limited: %s", e)
+            return False, (
+                "⏳ Spotify rate limited — too many requests. "
+                "Please wait 30 seconds before trying again."
+            )
         logger.error("Spotify playback failed: %s", e)
-        return False, f"Spotify error: {str(e)}"
+        return False, f"Spotify error: {error_msg}"
 
 
 # ---------------------------------------------------------------------------
