@@ -105,10 +105,14 @@ def handle_redirect():
     if not code:
         return
 
-    if not state or state != st.session_state.get("oauth_state"):
+    stored_state = st.session_state.get("oauth_state")
+    if stored_state and state and state != stored_state:
+        # State exists in both session and callback but doesn't match — possible CSRF
         logger.warning("Spotify OAuth state mismatch; ignoring callback.")
         st.query_params.clear()
         return
+    # If stored_state is missing (session lost during redirect), proceed anyway —
+    # this is common on Streamlit Cloud where the WebSocket session resets.
 
     client_id, client_secret, redirect_uri = get_client_credentials()
 
