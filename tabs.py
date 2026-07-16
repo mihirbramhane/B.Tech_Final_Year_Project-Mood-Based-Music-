@@ -28,16 +28,13 @@ EMOTION_COLORS = {
 
 
 def render_detect_tab(sp):
-    col_camera, col_result = st.columns([1.2, 1], gap="large")
-
-    with col_camera:
-        with st.container(border=True):
-            st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
-            st.markdown('<h3>📷 Camera</h3>', unsafe_allow_html=True)
-            img_file_buffer = st.camera_input(
-                "Point your face at the camera and take a snapshot",
-                label_visibility="collapsed",
-            )
+    with st.container(border=True):
+        st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
+        st.markdown('<h3>📷 Camera</h3>', unsafe_allow_html=True)
+        img_file_buffer = st.camera_input(
+            "Point your face at the camera and take a snapshot",
+            label_visibility="collapsed",
+        )
 
     face_img = None
     if img_file_buffer is not None:
@@ -65,84 +62,82 @@ def render_detect_tab(sp):
             st.session_state.last_emotion = None
             st.session_state.last_confidence = None
 
-    with col_result:
-        with st.container(border=True):
-            st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
-            if st.session_state.last_emotion:
-                emotion = st.session_state.last_emotion
-                emoji = EMOTION_EMOJIS.get(emotion, '❓')
-                color = EMOTION_COLORS.get(emotion, '#a855f7')
-                conf = st.session_state.last_confidence.get(emotion, 0) if st.session_state.last_confidence else 0
+    st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
 
-                st.markdown(f'''
-                    <div class="emotion-display" style="color:{color};">
-                        <span class="emotion-emoji">{emoji}</span>
-                        <span class="emotion-label">{emotion}</span>
-                        <p class="emotion-confidence">Confidence: {conf:.1%}</p>
-                    </div>
-                ''', unsafe_allow_html=True)
-            else:
-                st.markdown('''
-                    <div class="emotion-display">
-                        <span class="emotion-waiting-icon">🤔</span>
-                        <span class="emotion-label" style="font-size:1.2rem; color:#94a3b8;">Waiting...</span>
-                        <p class="emotion-confidence">Take a photo to detect your mood</p>
-                    </div>
-                ''', unsafe_allow_html=True)
+    reveal_class = " result-reveal" if st.session_state.last_emotion else ""
+    with st.container(border=True):
+        st.markdown(f'<span class="card-marker{reveal_class}"></span>', unsafe_allow_html=True)
+        if st.session_state.last_emotion:
+            emotion = st.session_state.last_emotion
+            emoji = EMOTION_EMOJIS.get(emotion, '❓')
+            color = EMOTION_COLORS.get(emotion, '#a855f7')
+            conf = st.session_state.last_confidence.get(emotion, 0) if st.session_state.last_confidence else 0
 
-        status = st.session_state.status
-        badge_class, badge_text = {
-            "waiting": ("status-waiting", "WAITING FOR INPUT"),
-            "playing": ("status-playing", "PLAYING MUSIC"),
-        }.get(status, ("status-error", "ERROR"))
+            st.markdown(f'''
+                <div class="emotion-display" style="color:{color};">
+                    <span class="emotion-emoji">{emoji}</span>
+                    <span class="emotion-label">{emotion}</span>
+                    <p class="emotion-confidence">Confidence: {conf:.1%}</p>
+                </div>
+            ''', unsafe_allow_html=True)
+        else:
+            st.markdown('''
+                <div class="emotion-display">
+                    <span class="emotion-waiting-icon">🤔</span>
+                    <span class="emotion-label" style="font-size:1.2rem; color:#94a3b8;">Waiting...</span>
+                    <p class="emotion-confidence">Take a photo to detect your mood</p>
+                </div>
+            ''', unsafe_allow_html=True)
 
-        st.markdown(
-            f'<div style="text-align:center; margin: 0.5rem 0;">'
-            f'<span class="status-badge {badge_class}"><span class="dot"></span>{badge_text}</span>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+    status = st.session_state.status
+    badge_class, badge_text = {
+        "waiting": ("status-waiting", "WAITING FOR INPUT"),
+        "playing": ("status-playing", "PLAYING MUSIC"),
+    }.get(status, ("status-error", "ERROR"))
+
+    st.markdown(
+        f'<div style="text-align:center; margin: 0.5rem 0;">'
+        f'<span class="status-badge {badge_class}"><span class="dot"></span>{badge_text}</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
     if face_img is not None and st.session_state.last_emotion:
         st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
 
-        col_img, col_chart = st.columns([1, 1], gap="large")
+        with st.container(border=True):
+            st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
+            st.markdown('<h3>🔍 Detected Face</h3>', unsafe_allow_html=True)
+            st.image(face_img, use_container_width=True)
 
-        with col_img:
-            with st.container(border=True):
-                st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
-                st.markdown('<h3>🔍 Detected Face</h3>', unsafe_allow_html=True)
-                st.image(face_img, use_container_width=True)
+        with st.container(border=True):
+            st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
+            st.markdown('<h3>📊 Emotion Probabilities</h3>', unsafe_allow_html=True)
 
-        with col_chart:
-            with st.container(border=True):
-                st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
-                st.markdown('<h3>📊 Emotion Probabilities</h3>', unsafe_allow_html=True)
+            if st.session_state.last_confidence:
+                sorted_conf = sorted(
+                    st.session_state.last_confidence.items(),
+                    key=lambda x: x[1],
+                    reverse=True
+                )
 
-                if st.session_state.last_confidence:
-                    sorted_conf = sorted(
-                        st.session_state.last_confidence.items(),
-                        key=lambda x: x[1],
-                        reverse=True
+                bars_html = []
+                for emo, prob in sorted_conf:
+                    emoji = EMOTION_EMOJIS.get(emo, '❓')
+                    color = EMOTION_COLORS.get(emo, '#a855f7')
+                    width = max(prob * 100, 2)
+                    bars_html.append(
+                        f'<div class="conf-bar-container">'
+                        f'<div class="conf-bar-label">'
+                        f'<span>{emoji} {emo.capitalize()}</span>'
+                        f'<span class="val">{prob:.1%}</span>'
+                        f'</div>'
+                        f'<div class="conf-bar-bg">'
+                        f'<div class="conf-bar-fill" style="width:{width}%; background:{color}; color:{color};"></div>'
+                        f'</div>'
+                        f'</div>'
                     )
-
-                    bars_html = []
-                    for emo, prob in sorted_conf:
-                        emoji = EMOTION_EMOJIS.get(emo, '❓')
-                        color = EMOTION_COLORS.get(emo, '#a855f7')
-                        width = max(prob * 100, 2)
-                        bars_html.append(
-                            f'<div class="conf-bar-container">'
-                            f'<div class="conf-bar-label">'
-                            f'<span>{emoji} {emo.capitalize()}</span>'
-                            f'<span class="val">{prob:.1%}</span>'
-                            f'</div>'
-                            f'<div class="conf-bar-bg">'
-                            f'<div class="conf-bar-fill" style="width:{width}%; background:{color}; color:{color};"></div>'
-                            f'</div>'
-                            f'</div>'
-                        )
-                    st.markdown(''.join(bars_html), unsafe_allow_html=True)
+                st.markdown(''.join(bars_html), unsafe_allow_html=True)
 
     if st.session_state.status == "playing" and st.session_state.play_message:
         st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
@@ -271,6 +266,13 @@ def render_settings_tab(sp):
     with st.container(border=True):
         st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
         st.markdown('<h3>🔄 Session</h3>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="stat-line"><span>Detections this session</span>'
+            f'<span class="val">{len(st.session_state.history)}</span></div>'
+            f'<div class="stat-line"><span>Current status</span>'
+            f'<span class="val" style="text-transform:capitalize;">{st.session_state.status}</span></div>',
+            unsafe_allow_html=True,
+        )
         if st.button("Reset Session"):
             st.session_state.last_emotion = None
             st.session_state.last_confidence = None

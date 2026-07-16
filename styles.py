@@ -381,74 +381,78 @@ CSS = """
     }
 
     /* ==============================================================
-       Sidebar
+       Sticky slim header (branding + connection status)
        ============================================================== */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #14142c 0%, #0a0a16 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.06);
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        padding: 0.7rem 1rem;
+        margin: -1rem -1rem 1.2rem;
+        background: rgba(10, 10, 22, 0.72);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    .sidebar-brand {
+    .sticky-header-brand {
         display: flex;
         align-items: center;
         gap: 0.6rem;
-        margin-bottom: 0.8rem;
+        min-width: 0;
     }
 
-    .sidebar-brand .badge-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 11px;
+    .sticky-logo {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(6,182,212,0.25));
         border: 1px solid rgba(255,255,255,0.12);
     }
 
-    .sidebar-title {
+    .sticky-title {
         color: var(--text-hi);
         font-family: 'Outfit', sans-serif;
-        font-size: 1.15rem;
+        font-size: 1rem;
         font-weight: 700;
-        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .sidebar-tagline {
-        color: var(--text-faint);
-        font-size: 0.75rem;
-        margin: 0;
+    .sticky-status {
+        flex-shrink: 0;
+        padding: 0.35rem 0.8rem;
     }
 
-    .sidebar-section {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 14px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .sidebar-stat-row {
+    /* ==============================================================
+       Session stat rows (Settings tab — replaces the old sidebar)
+       ============================================================== */
+    .stat-line {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.35rem 0;
+        padding: 0.4rem 0;
         color: var(--text-mid);
-        font-size: 0.85rem;
+        font-size: 0.88rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    .sidebar-stat-row .val {
+    .stat-line:last-of-type { border-bottom: none; }
+
+    .stat-line .val {
         color: var(--text-hi);
         font-weight: 700;
         font-family: 'Outfit', sans-serif;
-    }
-
-    .sidebar-footer {
-        color: var(--text-faint);
-        font-size: 0.75rem;
-        text-align: center;
-        line-height: 1.5;
     }
 
     /* ==============================================================
@@ -697,35 +701,107 @@ CSS = """
 
     [data-testid="stMetricValue"] { color: var(--text-hi); }
 
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 6px;
-        background: rgba(255,255,255,0.03);
-        padding: 6px;
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.07);
+    /* ==============================================================
+       Navigation bar — desktop pill row / mobile fixed bottom bar.
+       Same st.button() widgets in both; this media query only changes
+       the container's position and the buttons' size/wrap.
+       ============================================================== */
+    .bottom-nav-marker { display: none; }
+
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.07) !important;
+        border-radius: 16px !important;
+        padding: 6px !important;
+        margin-bottom: 1.5rem !important;
+        box-shadow: none !important;
     }
 
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 11px;
-        padding: 10px 20px;
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker)::before {
+        display: none;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) [data-testid="stHorizontalBlock"] {
+        gap: 6px !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) [data-testid="column"] {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 1 1 0 !important;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) .stButton > button {
+        background: transparent;
         color: var(--text-lo);
-        font-weight: 600;
         font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 11px;
+        padding: 10px 14px;
+        min-height: 44px;
+        box-shadow: none;
+        transform: none;
         transition: all 0.25s ease;
     }
 
-    .stTabs [data-baseweb="tab"]:hover {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) .stButton > button:hover {
         color: var(--text-hi);
-        background: rgba(255,255,255,0.04);
+        background: rgba(255,255,255,0.05);
+        transform: none;
+        box-shadow: none;
     }
 
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, var(--purple), var(--indigo)) !important;
-        color: white !important;
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) .stButton > button[data-testid="baseButton-primary"] {
+        background: linear-gradient(135deg, var(--purple), var(--indigo));
+        color: white;
         box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
     }
 
-    .stTabs [data-baseweb="tab-highlight"] { display: none; }
+    @media (max-width: 768px) {
+        [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            border-radius: 0 !important;
+            border: none !important;
+            border-top: 1px solid rgba(255,255,255,0.08) !important;
+            background: rgba(10,10,22,0.9) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 6px 6px calc(6px + env(safe-area-inset-bottom)) !important;
+            margin: 0 !important;
+        }
+
+        [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.bottom-nav-marker) .stButton > button {
+            font-size: 0.66rem;
+            line-height: 1.2;
+            padding: 6px 2px;
+            white-space: normal;
+            border-radius: 10px;
+        }
+
+        /* Clear the fixed bottom nav so scrolled content/footer isn't hidden behind it */
+        [data-testid="stAppViewBlockContainer"] {
+            padding-bottom: 78px !important;
+        }
+    }
+
+    /* ==============================================================
+       Result reveal micro-interaction
+       ============================================================== */
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.result-reveal) {
+        animation: resultReveal 0.5s cubic-bezier(.2,.8,.2,1);
+    }
+
+    @keyframes resultReveal {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
     [data-testid="stSlider"] [role="slider"] {
         box-shadow: 0 0 0 6px rgba(168, 85, 247, 0.18);
@@ -743,6 +819,7 @@ CSS = """
         font-family: 'Outfit', sans-serif;
         transition: all 0.3s ease;
         width: 100%;
+        min-height: 44px;
         position: relative;
         overflow: hidden;
     }
@@ -921,6 +998,14 @@ CSS = """
         .emotion-emoji { font-size: 4rem; }
         .emotion-label { font-size: 1.4rem; letter-spacing: 2px; }
         .playlist-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+        /* Touch targets: more breathing room between tappable rows/cards */
+        .timeline-item { padding: 0.7rem 0.8rem; min-height: 44px; }
+        .playlist-card .pl-play { width: 40px; height: 40px; opacity: 1; transform: none; }
+        .playlist-card .pl-sub { padding-right: 2.6rem; }
+        .sticky-title { font-size: 0.9rem; }
+        .sticky-status-text { display: none; }
+        .sticky-status { padding: 0.4rem 0.55rem; }
     }
 </style>
 """

@@ -17,7 +17,6 @@ st.set_page_config(
     page_title="Mood Music Player",
     page_icon="🎧",
     layout="wide",
-    initial_sidebar_state="expanded",
 )
 
 st.markdown(CSS, unsafe_allow_html=True)
@@ -36,6 +35,8 @@ if "play_message" not in st.session_state:
     st.session_state.play_message = ""
 if "history" not in st.session_state:
     st.session_state.history = []
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "detect"
 
 # ---------------------------------------------------------------------------
 # Spotify Sign-In Gate
@@ -96,70 +97,62 @@ if sp is None:
     st.rerun()
 
 # ---------------------------------------------------------------------------
-# Sidebar: account + connection status
-# ---------------------------------------------------------------------------
-
-with st.sidebar:
-    st.markdown(
-        '<div class="sidebar-brand">'
-        '<span class="badge-icon">🎧</span>'
-        '<div><p class="sidebar-title">Mood Music</p>'
-        '<p class="sidebar-tagline">AI-powered playback</p></div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<span class="status-badge status-playing"><span class="dot"></span>Spotify Connected</span>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        f'<div class="sidebar-section" style="margin-top:1.2rem;">'
-        f'<div class="sidebar-stat-row"><span>Detections this session</span>'
-        f'<span class="val">{len(st.session_state.history)}</span></div>'
-        f'<div class="sidebar-stat-row"><span>Current status</span>'
-        f'<span class="val" style="text-transform:capitalize;">{st.session_state.status}</span></div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="sidebar-footer">Built with ❤️ using<br/>Streamlit, TensorFlow &amp; Spotify API</p>',
-        unsafe_allow_html=True,
-    )
-
-# ---------------------------------------------------------------------------
-# Main Content
+# Sticky slim header: branding + connection status (replaces the sidebar)
 # ---------------------------------------------------------------------------
 
 st.markdown(
-    '<div class="app-header">'
-    '<span class="app-logo-badge">🎧</span>'
-    '<h1 class="hero-title">Mood Music Player</h1>'
+    '<div class="sticky-header">'
+    '<div class="sticky-header-brand">'
+    '<span class="sticky-logo">🎧</span>'
+    '<span class="sticky-title">Mood Music Player</span>'
+    '</div>'
+    '<span class="status-badge status-playing sticky-status">'
+    '<span class="dot"></span><span class="sticky-status-text">Connected</span>'
+    '</span>'
     '</div>',
     unsafe_allow_html=True,
 )
-st.markdown(
-    '<p class="hero-subtitle">Let AI read your emotions and play the perfect playlist</p>',
-    unsafe_allow_html=True,
-)
-st.markdown('<div class="fancy-divider"></div>', unsafe_allow_html=True)
 
-tab_detect, tab_history, tab_playlists, tab_settings = st.tabs(
-    ["🎯 Detect", "📊 History", "🎵 Playlists", "⚙️ Settings"]
-)
+# ---------------------------------------------------------------------------
+# Navigation: bottom bar on mobile, pill row on desktop — same buttons, one
+# CSS media query flips the layout. Drives st.session_state.active_tab,
+# which the dispatch below reads to call the matching render_*_tab().
+# ---------------------------------------------------------------------------
 
-with tab_detect:
+NAV_ITEMS = [
+    ("detect", "🎯 Detect"),
+    ("history", "📊 History"),
+    ("playlists", "🎵 Playlists"),
+    ("settings", "⚙️ Settings"),
+]
+
+with st.container(border=True):
+    st.markdown('<span class="bottom-nav-marker"></span>', unsafe_allow_html=True)
+    nav_cols = st.columns(len(NAV_ITEMS))
+    for col, (tab_key, label) in zip(nav_cols, NAV_ITEMS):
+        with col:
+            is_active = st.session_state.active_tab == tab_key
+            if st.button(
+                label,
+                key=f"nav_{tab_key}",
+                type="primary" if is_active else "secondary",
+                use_container_width=True,
+            ):
+                st.session_state.active_tab = tab_key
+                st.rerun()
+
+# ---------------------------------------------------------------------------
+# Main Content: dispatch to the active tab's render function
+# ---------------------------------------------------------------------------
+
+active_tab = st.session_state.active_tab
+if active_tab == "detect":
     render_detect_tab(sp)
-
-with tab_history:
+elif active_tab == "history":
     render_history_tab()
-
-with tab_playlists:
+elif active_tab == "playlists":
     render_playlists_tab()
-
-with tab_settings:
+elif active_tab == "settings":
     render_settings_tab(sp)
 
 # ---- Footer ----
