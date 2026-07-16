@@ -9,7 +9,6 @@ import auth
 from functions import (
     detect_face,
     play_song,
-    has_consecutive_repeats,
     EMOTION_EMOJIS,
     EMOTION_LABELS,
     PLAYLIST_MAP,
@@ -52,7 +51,7 @@ def render_detect_tab(sp):
             st.session_state.last_confidence = confidence
             st.session_state.history.append(emotion)
 
-            # Instantly play music based on detected mood
+            # Instantly play music based on the detected mood
             st.session_state.status = "playing"
             try:
                 success, message = play_song(sp, emotion)
@@ -75,23 +74,11 @@ def render_detect_tab(sp):
                 color = EMOTION_COLORS.get(emotion, '#a855f7')
                 conf = st.session_state.last_confidence.get(emotion, 0) if st.session_state.last_confidence else 0
 
-                threshold = st.session_state.detection_threshold
-                progress = min(st.session_state.detection_count / threshold, 1.0)
-                progress_pct = int(progress * 100)
-
-<<<<<<< HEAD
                 st.markdown(f'''
-                    <div class="emotion-display" style="--e-color:{color};">
+                    <div class="emotion-display" style="color:{color};">
                         <span class="emotion-emoji">{emoji}</span>
                         <span class="emotion-label">{emotion}</span>
                         <p class="emotion-confidence">Confidence: {conf:.1%}</p>
-                    </div>
-                    <p class="progress-label-row">🎯 Detection Progress</p>
-                    <div class="progress-container">
-                        <div class="progress-fill" style="width:{progress_pct}%;"></div>
-                        <span class="progress-text">
-                            {st.session_state.detection_count} / {threshold} consecutive
-                        </span>
                     </div>
                 ''', unsafe_allow_html=True)
             else:
@@ -102,40 +89,10 @@ def render_detect_tab(sp):
                         <p class="emotion-confidence">Take a photo to detect your mood</p>
                     </div>
                 ''', unsafe_allow_html=True)
-=======
-            st.markdown(f'''
-                <div class="emotion-display">
-                    <span class="emotion-emoji">{emoji}</span>
-                    <span class="emotion-label">{emotion}</span>
-                    <p class="emotion-confidence">Confidence: {conf:.1%}</p>
-                </div>
-            ''', unsafe_allow_html=True)
-
-            if st.session_state.status == "playing" and st.session_state.play_message:
-                st.markdown(f'''
-                    <div style="text-align:center; margin-top:1rem; padding:0.8rem;
-                                background:linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1));
-                                border-radius:12px; border:1px solid rgba(34,197,94,0.3);">
-                        <p style="color:#22c55e; font-size:1rem; margin:0;">🎵 Now Playing</p>
-                        <p style="color:#94a3b8; font-size:0.85rem; margin:0.3rem 0 0 0;">{st.session_state.play_message}</p>
-                    </div>
-                ''', unsafe_allow_html=True)
-        else:
-            st.markdown('''
-                <div class="emotion-display">
-                    <span class="emotion-emoji">🤔</span>
-                    <span class="emotion-label" style="font-size:1.2rem;">Waiting...</span>
-                    <p class="emotion-confidence">Take a photo to detect your mood</p>
-                </div>
-            ''', unsafe_allow_html=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)
->>>>>>> f359bbe0340fd738c0c565c40cf68ca48399032c
 
         status = st.session_state.status
         badge_class, badge_text = {
             "waiting": ("status-waiting", "WAITING FOR INPUT"),
-            "detecting": ("status-detecting", "DETECTING EMOTION"),
             "playing": ("status-playing", "PLAYING MUSIC"),
         }.get(status, ("status-error", "ERROR"))
 
@@ -174,17 +131,17 @@ def render_detect_tab(sp):
                         emoji = EMOTION_EMOJIS.get(emo, '❓')
                         color = EMOTION_COLORS.get(emo, '#a855f7')
                         width = max(prob * 100, 2)
-                        bars_html.append(f'''
-                            <div class="conf-bar-container">
-                                <div class="conf-bar-label">
-                                    <span>{emoji} {emo.capitalize()}</span>
-                                    <span class="val">{prob:.1%}</span>
-                                </div>
-                                <div class="conf-bar-bg">
-                                    <div class="conf-bar-fill" style="width:{width}%; background:{color}; color:{color};"></div>
-                                </div>
-                            </div>
-                        ''')
+                        bars_html.append(
+                            f'<div class="conf-bar-container">'
+                            f'<div class="conf-bar-label">'
+                            f'<span>{emoji} {emo.capitalize()}</span>'
+                            f'<span class="val">{prob:.1%}</span>'
+                            f'</div>'
+                            f'<div class="conf-bar-bg">'
+                            f'<div class="conf-bar-fill" style="width:{width}%; background:{color}; color:{color};"></div>'
+                            f'</div>'
+                            f'</div>'
+                        )
                     st.markdown(''.join(bars_html), unsafe_allow_html=True)
 
     if st.session_state.status == "playing" and st.session_state.play_message:
@@ -256,13 +213,13 @@ def render_history_tab():
             emoji = EMOTION_EMOJIS.get(entry, '❓')
             color = EMOTION_COLORS.get(entry, '#a855f7')
             idx = n - i
-            items_html.append(f'''
-                <div class="timeline-item" style="--dot-color:{color};">
-                    <span class="ti-emoji">{emoji}</span>
-                    <span class="ti-label">{entry}</span>
-                    <span class="ti-index">#{idx}</span>
-                </div>
-            ''')
+            items_html.append(
+                f'<div class="timeline-item" style="color:{color};">'
+                f'<span class="ti-emoji">{emoji}</span>'
+                f'<span class="ti-label">{entry}</span>'
+                f'<span class="ti-index">#{idx}</span>'
+                f'</div>'
+            )
         st.markdown(f'<div class="timeline">{"".join(items_html)}</div>', unsafe_allow_html=True)
 
 
@@ -276,7 +233,7 @@ def render_playlists_tab():
             playlist_id = PLAYLIST_MAP.get(emotion, '')
             color = EMOTION_COLORS.get(emotion, '#a855f7')
             cards_html.append(
-                f'<a class="playlist-card" style="--pl-color:{color};" '
+                f'<a class="playlist-card" style="color:{color};" '
                 f'href="https://open.spotify.com/playlist/{playlist_id}" target="_blank">'
                 f'<div class="pl-art">{emoji}</div>'
                 f'<div class="pl-name">{emotion}</div>'
@@ -288,15 +245,6 @@ def render_playlists_tab():
 
 
 def render_settings_tab(sp):
-    with st.container(border=True):
-        st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
-        st.markdown('<h3>🎯 Detection</h3>', unsafe_allow_html=True)
-        st.session_state.detection_threshold = st.slider(
-            "Detection Threshold",
-            min_value=2, max_value=30, value=st.session_state.detection_threshold,
-            help="Number of consecutive same-emotion detections required before playing a song.",
-        )
-
     with st.container(border=True):
         st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
         st.markdown('<h3>🎧 Spotify Account</h3>', unsafe_allow_html=True)
@@ -324,11 +272,9 @@ def render_settings_tab(sp):
         st.markdown('<span class="card-marker"></span>', unsafe_allow_html=True)
         st.markdown('<h3>🔄 Session</h3>', unsafe_allow_html=True)
         if st.button("Reset Session"):
-            st.session_state.emotions = []
             st.session_state.last_emotion = None
             st.session_state.last_confidence = None
             st.session_state.status = "waiting"
             st.session_state.play_message = ""
-            st.session_state.detection_count = 0
             st.session_state.history = []
             st.rerun()

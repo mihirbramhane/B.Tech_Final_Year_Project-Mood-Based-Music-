@@ -147,7 +147,7 @@ CSS = """
     .card-marker { display: none; }
 
     .glass-card,
-    [data-testid="stVerticalBlockBorderWrapper"]:has(.card-marker) {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.card-marker) {
         background: var(--glass-bg) !important;
         border: 1px solid var(--glass-border) !important;
         border-radius: 18px !important;
@@ -162,7 +162,7 @@ CSS = """
     }
 
     .glass-card::before,
-    [data-testid="stVerticalBlockBorderWrapper"]:has(.card-marker)::before {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.card-marker)::before {
         content: "";
         position: absolute;
         top: 0; left: 0; right: 0;
@@ -172,14 +172,14 @@ CSS = """
     }
 
     .glass-card:hover,
-    [data-testid="stVerticalBlockBorderWrapper"]:has(.card-marker):hover {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.card-marker):hover {
         transform: translateY(-3px);
         border-color: rgba(168, 85, 247, 0.35);
         box-shadow: 0 14px 40px rgba(168, 85, 247, 0.12);
     }
 
     .glass-card h3,
-    [data-testid="stVerticalBlockBorderWrapper"]:has(.card-marker) h3 {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(> div > div > div > div > div > p > span.card-marker) h3 {
         color: var(--text-hi);
         font-family: 'Outfit', sans-serif;
         font-size: 1.12rem;
@@ -194,7 +194,7 @@ CSS = """
     .emotion-display {
         text-align: center;
         padding: 1.8rem 1rem 1.2rem;
-        --glow: var(--e-color, var(--purple));
+        color: var(--purple);
     }
 
     .emotion-emoji {
@@ -202,7 +202,7 @@ CSS = """
         display: inline-block;
         margin-bottom: 0.6rem;
         animation: floatBounce 2.6s ease-in-out infinite;
-        filter: drop-shadow(0 0 22px var(--glow));
+        filter: drop-shadow(0 0 22px currentColor);
     }
 
     @keyframes floatBounce {
@@ -217,8 +217,8 @@ CSS = """
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 3px;
-        color: var(--glow);
-        text-shadow: 0 0 30px color-mix(in srgb, var(--glow) 50%, transparent);
+        color: currentColor;
+        text-shadow: 0 0 30px color-mix(in srgb, currentColor 50%, transparent);
     }
 
     .emotion-confidence {
@@ -464,8 +464,8 @@ CSS = """
         position: relative;
         border-radius: 16px;
         padding: 1.2rem 1.1rem 1.3rem;
-        background: linear-gradient(160deg, color-mix(in srgb, var(--pl-color) 22%, #12121f), #0e0e1c 80%);
-        border: 1px solid color-mix(in srgb, var(--pl-color) 35%, transparent);
+        background: linear-gradient(160deg, color-mix(in srgb, currentColor 22%, #12121f), #0e0e1c 80%);
+        border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
         overflow: hidden;
         transition: transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s ease;
         text-decoration: none !important;
@@ -474,14 +474,14 @@ CSS = """
 
     .playlist-card:hover {
         transform: translateY(-6px) scale(1.02);
-        box-shadow: 0 16px 36px color-mix(in srgb, var(--pl-color) 30%, transparent);
+        box-shadow: 0 16px 36px color-mix(in srgb, currentColor 30%, transparent);
     }
 
     .playlist-card .pl-art {
         width: 100%;
         aspect-ratio: 1 / 1;
         border-radius: 12px;
-        background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--pl-color) 70%, white 10%), color-mix(in srgb, var(--pl-color) 40%, #000 30%));
+        background: radial-gradient(circle at 30% 30%, color-mix(in srgb, currentColor 70%, white 10%), color-mix(in srgb, currentColor 40%, #000 30%));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -641,8 +641,8 @@ CSS = """
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: var(--dot-color, var(--purple));
-        box-shadow: 0 0 10px var(--dot-color, var(--purple));
+        background: currentColor;
+        box-shadow: 0 0 10px currentColor;
     }
 
     .timeline-item .ti-emoji { font-size: 1.3rem; }

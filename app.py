@@ -26,22 +26,16 @@ st.markdown(CSS, unsafe_allow_html=True)
 # Session State Initialization
 # ---------------------------------------------------------------------------
 
-if "emotions" not in st.session_state:
-    st.session_state.emotions = []
 if "status" not in st.session_state:
-    st.session_state.status = "waiting"         # waiting | detecting | playing | error
+    st.session_state.status = "waiting"         # waiting | playing | error
 if "last_emotion" not in st.session_state:
     st.session_state.last_emotion = None
 if "last_confidence" not in st.session_state:
     st.session_state.last_confidence = None
 if "play_message" not in st.session_state:
     st.session_state.play_message = ""
-if "detection_count" not in st.session_state:
-    st.session_state.detection_count = 0
 if "history" not in st.session_state:
     st.session_state.history = []
-if "detection_threshold" not in st.session_state:
-    st.session_state.detection_threshold = 5
 
 # ---------------------------------------------------------------------------
 # Spotify Sign-In Gate
